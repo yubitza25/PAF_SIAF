@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    @Qualifier("customUserDetailsService")
     private final UserDetailsService userDetailsService;
 
     @Override

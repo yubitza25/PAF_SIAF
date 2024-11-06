@@ -1,40 +1,66 @@
 package sistemaEmpleados.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import sistemaEmpleados.model.Usuario;
-import sistemaEmpleados.repositories.UsuarioRepository;
-
 import java.util.List;
-import java.util.logging.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import sistemaEmpleados.converter.UsuarioConverter;
+import sistemaEmpleados.dto.UsuarioDto;
+import sistemaEmpleados.model.Usuario;
+import sistemaEmpleados.services.UsuarioService;
+import sistemaEmpleados.util.WrapperResponse;
 
 @RestController
 @RequestMapping("/api/v1/usuarios")
 public class UsuarioController {
-
-    private static final Logger logger = Logger.getLogger(UsuarioController.class.getName());
+    @Autowired
+    private UsuarioService service;
 
     @Autowired
-    private UsuarioRepository usuarioRepository;
-
+    private UsuarioConverter converter;
     @GetMapping
-    public ResponseEntity<?> listarUsuarios() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            logger.warning("Intento de acceso no autorizado");
-            return ResponseEntity.status(401).body("No autorizado: El token falta o es inválido");
-        }
-        List<Usuario> usuarios = usuarioRepository.findAll();
-        if (usuarios.isEmpty()) {
-            logger.info("No se encontraron usuarios");
-            return ResponseEntity.status(404).body("No se encontraron usuarios");
-        }
-        logger.info("Usuarios encontrados: " + usuarios.size());
-        return ResponseEntity.ok(usuarios);
+    public ResponseEntity<List<UsuarioDto>> findAll(
+            @RequestParam(value = "offset", required = false, defaultValue = "0") int pageNumber,
+            @RequestParam(value = "limit", required = false, defaultValue = "5") int pageSize
+    ) {
+        Pageable page = PageRequest.of(pageNumber, pageSize);
+        List<UsuarioDto> usuario = converter.fromEntities(service.findAll());
+        return new WrapperResponse(true, "success", usuario).createResponse(HttpStatus.OK);
+    }
+
+
+
+
+    @PostMapping
+    public ResponseEntity<UsuarioDto> create (@RequestBody UsuarioDto usuario) {
+        Usuario entity = converter.fromDTO(usuario);
+        UsuarioDto dto = converter.fromEntity(service.save(entity));//        return ResponseEntity.ok(dto);
+        return new WrapperResponse(true, "success", dto).createResponse(HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UsuarioDto> update (@PathVariable("id") int id, @RequestBody UsuarioDto usuario) {
+        Usuario entity = converter.fromDTO(usuario);
+        UsuarioDto dto = converter.fromEntity(service.save(entity));
+//        return ResponseEntity.ok(dto);
+        return new WrapperResponse(true, "success", dto).createResponse(HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity delete (@PathVariable("id") Long id) {
+        service.delete(id);
+//        return ResponseEntity.ok(null);
+        return new WrapperResponse(true, "success", null).createResponse(HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UsuarioDto> findById (@PathVariable("id") Long id) {
+        UsuarioDto dto = converter.fromEntity(service.findById(id));
+
+//        return ResponseEntity.ok(dto);
+        return new WrapperResponse(true, "success", dto).createResponse(HttpStatus.OK);
     }
 }

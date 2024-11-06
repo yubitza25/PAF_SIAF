@@ -52,6 +52,10 @@ public class Usuario implements UserDetails {
     }
 
     @Override
+    public String getPassword() {
+        return password;
+    }
+    @Override
     public String getUsername() {
         return usuario;
     }
@@ -77,7 +81,26 @@ public class Usuario implements UserDetails {
     }
 
     public enum TipoUsuario {
-        ADMINISTRADOR,
-        COLABORADOR
+        ADMINISTRADOR("administrador"),
+        USUARIO("usuario");
+
+        private final String value;
+
+        TipoUsuario(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public static TipoUsuario fromValue(String value) {
+            for (TipoUsuario tipo : TipoUsuario.values()) {
+                if (tipo.value.equalsIgnoreCase(value)) {
+                    return tipo;
+                }
+            }
+            throw new IllegalArgumentException("No enum constant " + TipoUsuario.class.getCanonicalName() + "." + value);
+        }
     }
 }
