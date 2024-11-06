@@ -49,27 +49,47 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        username = jwtService.getUsernameFromToken(token);
+        try {
+            username = jwtService.getUsernameFromToken(token);
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-            if (jwtService.isTokenValid(token, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities());
+                if (jwtService.isTokenValid(token, userDetails)) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities());
 
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            } else {
-                WrapperResponse<String> wrapperResponse = new WrapperResponse<>(false, "token invalido ", null);
-                response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                response.setContentType("application/json");
-                response.getWriter().write(new ObjectMapper().writeValueAsString(wrapperResponse));
-                return;
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                } else {
+                    WrapperResponse<String> wrapperResponse = new WrapperResponse<>(false, "Token inválido", null);
+                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                    response.setContentType("application/json");
+                    response.getWriter().write(new ObjectMapper().writeValueAsString(wrapperResponse));
+                    return;
+                }
             }
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            WrapperResponse<String> wrapperResponse = new WrapperResponse<>(false, "Token expirado", null);
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType("application/json");
+            response.getWriter().write(new ObjectMapper().writeValueAsString(wrapperResponse));
+            return;
+        } catch (io.jsonwebtoken.SignatureException e) {
+            WrapperResponse<String> wrapperResponse = new WrapperResponse<>(false, "Firma del token inválida", null);
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType("application/json");
+            response.getWriter().write(new ObjectMapper().writeValueAsString(wrapperResponse));
+            return;
+        } catch (Exception e) {
+            WrapperResponse<String> wrapperResponse = new WrapperResponse<>(false, "Token inválido", null);
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType("application/json");
+            response.getWriter().write(new ObjectMapper().writeValueAsString(wrapperResponse));
+            return;
         }
 
         filterChain.doFilter(request, response);

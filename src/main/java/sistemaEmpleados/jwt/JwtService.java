@@ -32,6 +32,8 @@ public class JwtService {
                 .setSubject(user.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis()+1000*60*24))
+                //token expira en 10 segundos - solo para pruebas
+                //.setExpiration(new Date(System.currentTimeMillis()+1000*10))
                 .signWith(getKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
