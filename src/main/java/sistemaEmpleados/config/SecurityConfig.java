@@ -50,7 +50,7 @@ public class SecurityConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:4200")//aca se agrega la ip de donde se arana las peticiones
+                        .allowedOrigins("http://localhost:4200")//aca se agrega la url de donde se arana las peticiones
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
