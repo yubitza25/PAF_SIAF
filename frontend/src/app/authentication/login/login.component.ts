@@ -21,16 +21,23 @@ export class LoginComponent {
     // Llamar al servicio de login para autenticar al usuario
     this.loginService.login(this.usuario, this.password).subscribe({
       next: (response) => {
-        // Guardar el token cuando el login sea exitoso
-        this.loginService.setToken(response.token);
-        console.log(response.token);
-        // Redirigir al dashboard después del login
-        this.router.navigate(['/home']);
+        // Validar si el token existe en la respuesta
+        if (response.token) {
+          // Guardar el token cuando el login sea exitoso
+          this.loginService.setToken(response.token);
+          console.log(response.token);
+          // Redirigir al dashboard después del login
+          this.router.navigate(['/home']);
+        } else {
+          // Si no hay token, muestra un mensaje de error
+          this.errorMessage = response.message;
+        }
       },
       error: (error) => {
-        // Si ocurre un error, mostrar un mensaje
+        // Si ocurre un error en la solicitud, mostrar un mensaje
         this.errorMessage = 'Credenciales inválidas';
       },
     });
   }
+  
 }
