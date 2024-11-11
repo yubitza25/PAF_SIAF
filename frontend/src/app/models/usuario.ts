@@ -2,20 +2,20 @@ export class Usuario {
   id: number;
   usuario: string;
   password: string;
-  activo: number;
-  rol: string;
+  salt: string;
+  tipo_usuario: string;
 
   constructor(
     id: number,
     usuario: string,
     password: string,
-    activo: number,
-    rol: string
+    salt: string,
+    tipo_usuario: string
   ) {
     this.id = id;
     this.usuario = usuario;
     this.password = password;
-    this.activo = activo;
-    this.rol = rol;
+    this.salt = salt;
+    this.tipo_usuario = tipo_usuario;
   }
 }
