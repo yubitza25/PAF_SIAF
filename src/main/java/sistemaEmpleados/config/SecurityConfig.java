@@ -7,6 +7,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import sistemaEmpleados.jwt.JwtAuthenticationFilter;
 
 @Configuration
@@ -31,8 +33,8 @@ public class SecurityConfig {
                                 "/api/v1/asistencias/**",
                                 "/api/v1/empleados/**",
                                 "/api/v1/areas/**"
-                                ).authenticated()
-                		)
+                        ).authenticated()
+                )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 );
@@ -40,5 +42,19 @@ public class SecurityConfig {
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**")
+                        .allowedOrigins("http://localhost:4200")//aca se agrega la ip de donde se arana las peticiones
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
+            }
+        };
     }
 }
